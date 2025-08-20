@@ -9,19 +9,16 @@ jobs:
   lint:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [10.x]
-
     steps:
-      - uses: actions/checkout@v1
+      # Setup the necessary tools
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 64
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+      - name: Use Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.19.2
 
       - name: npm login
         run:
@@ -29,13 +26,8 @@ jobs:
         env:
           NPM_READONLY_AUTH_TOKEN: ${{ secrets.NPM_READONLY_AUTH_TOKEN }}
 
-      - name: npm install
-        working-directory: ./assets/games
-        run: npm i --ignore-scripts
+      - name: npm install dependencies
+        run: npm install
 
       - name: Run ESLint
-        uses: ninosaurus/eslint-check@v5
-        with:
-          eslint-config-path: "./eslint.config.mjs"
-          custom-directory: "./assets/games"
-          repo-token: ${{secrets.GITHUB_TOKEN}}
+        run: npx eslint . --ext .ts,.tsx
