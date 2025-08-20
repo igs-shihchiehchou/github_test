@@ -1,0 +1,19 @@
+# This is a comment.
+# Each line is a file pattern followed by one or more owners.
+#
+# A CODEOWNERS file uses a pattern that follows most of the same rules used in
+# gitignore files. The pattern is followed by one or more GitHub usernames or
+# team names using the standard @username or @org/team-name format.
+#
+# Users and teams must have explicit write access to the repository, even if
+# the team's members already have access.
+#
+# If you want to match two or more code owners with the same pattern, all the
+# code owners must be on the same line. If the code owners are not on the same
+# line, the pattern matches only the last mentioned code owner.
+
+# The default policy and be overridden by the following rules.
+
+
+# ======== replace this to your GitHub username or team name ========
+* igs-shihchiehchou@igs.com.tw
