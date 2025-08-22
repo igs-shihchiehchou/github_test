@@ -100,7 +100,7 @@ jobs:
             \`\`\`
             `;
 
-            github.rest.issues.createComment({
+            github.issues.createComment({
               issue_number,
               owner,
               repo,
