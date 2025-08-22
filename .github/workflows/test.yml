@@ -30,21 +30,26 @@ jobs:
       - name: npm install dependencies
         run: npm install
 
-      - name: Run Unit Test
-        run: npm test
-
-      - name: Check Coverage Threshold
+      - name: Run Unit Test and Check Coverage
         run: |
-          if [ -f "coverage/coverage-summary.json" ]; then
-            COVERAGE=$(node -p "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.lines.pct")
-            echo "Total line coverage: ${COVERAGE}%"
-            if (( $(echo "$COVERAGE < 80" | bc -l) )); then
-              echo "❌ Coverage is below 80% threshold. Current: ${COVERAGE}%"
-              exit 1
-            else
-              echo "✅ Coverage meets 80% threshold. Current: ${COVERAGE}%"
-            fi
-          else
-            echo "❌ Coverage report not found. Make sure Jest is configured to generate coverage."
+          # Run tests and capture output
+          TEST_OUTPUT=$(npm test 2>&1)
+          echo "$TEST_OUTPUT"
+
+          # Extract line coverage percentage from Jest output
+          COVERAGE=$(echo "$TEST_OUTPUT" | grep "All files" | awk '{print $10}' | sed 's/%//')
+
+          if [ -z "$COVERAGE" ]; then
+            echo "❌ Could not extract coverage from test output"
             exit 1
+          fi
+
+          echo "Total line coverage: ${COVERAGE}%"
+
+          # Check if coverage meets 80% threshold
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "❌ Coverage is below 80% threshold. Current: ${COVERAGE}%"
+            exit 1
+          else
+            echo "✅ Coverage meets 80% threshold. Current: ${COVERAGE}%"
           fi
