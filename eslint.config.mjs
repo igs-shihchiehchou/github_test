@@ -21,6 +21,8 @@ export default [
       'settings/**',
       '**/*.d.ts',
       'extensions*',
+      'tests/test_tool/**',
+      '*.config.*',
     ],
   },
 

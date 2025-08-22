@@ -1,0 +1,8 @@
+{
+    "imports": {
+        "@platform/": "./assets/platform/scripts/",
+        "@appcommon/": "./assets/common/script/",
+        "@gamecommon/": "./assets/games/common/script/",
+        "@appproto/": "./assets/proto/"
+    }
+}

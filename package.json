@@ -4,12 +4,21 @@
   "creator": {
     "version": "3.8.5"
   },
+  "scripts": {
+    "test": "jest --coverage"
+  },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.27.1",
     "@eslint/js": "^9.33.0",
     "@stylistic/eslint-plugin": "^5.2.3",
+    "@types/jest": "^30.0.0",
     "eslint": "^9.33.0",
     "eslint-plugin-no-commented-code": "^1.0.10",
     "eslint-plugin-unicorn": "^55.0.0",
+    "jest": "^30.0.5",
+    "jest-canvas-mock": "^2.5.2",
+    "jest-environment-jsdom": "^30.0.5",
+    "ts-jest": "^29.4.1",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.40.0"
   }

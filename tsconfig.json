@@ -1,0 +1,16 @@
+{
+  /* Base configuration. Do not edit this field. */
+  "extends": "./temp/tsconfig.cocos.json",
+
+  /* Add your custom configuration here. */
+  "compilerOptions": {
+    "strict": false,
+    "esModuleInterop": true,
+    "paths": {
+      "@platform/*": ["./assets/platform/scripts/*"],
+      "@appcommon/*": ["./assets/common/script/*"],
+      "@gamecommon/*": ["./assets/games/common/script/*"],
+      "@appproto/*": ["./assets/proto/*"],
+    }
+  },
+}
