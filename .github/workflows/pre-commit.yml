@@ -20,8 +20,12 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # Ensure the commits within the PR can be loaded.
+      # NOTE - expect the PR no more than 64 commits
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 64
 
