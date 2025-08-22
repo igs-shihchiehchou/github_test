@@ -1,9 +1,8 @@
-import { createDefaultPreset } from 'ts-jest';
+const { createDefaultPreset } = require('ts-jest');
 
 const tsJestTransformCfg = createDefaultPreset().transform;
 
-
-export default {
+module.exports = {
     preset: 'ts-jest', // 重要
     collectCoverageFrom: ['<rootDir>/assets/**/*.ts'],
     testEnvironment: 'jsdom', // 需要；因为目前引擎依赖一点 DOM 环境
