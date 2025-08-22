@@ -30,14 +30,22 @@ jobs:
       - name: npm install dependencies
         run: npm install
 
-      - name: Run Unit Test and Check Coverage
+      - name: Run Unit Test
+        id: test
         run: |
           # Run tests and capture output
           TEST_OUTPUT=$(npm test 2>&1)
           echo "$TEST_OUTPUT"
 
+          # Save complete test output for PR comment
+          echo "test_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$TEST_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Check Coverage Threshold
+        run: |
           # Extract line coverage percentage from Jest output
-          COVERAGE=$(echo "$TEST_OUTPUT" | grep "All files" | awk '{print $10}' | sed 's/%//')
+          COVERAGE=$(echo "${{ steps.test.outputs.test_output }}" | grep "All files" | awk '{print $10}' | sed 's/%//')
 
           if [ -z "$COVERAGE" ]; then
             echo "❌ Could not extract coverage from test output"
@@ -53,3 +61,24 @@ jobs:
           else
             echo "✅ Coverage meets 80% threshold. Current: ${COVERAGE}%"
           fi
+
+      - name: Comment PR with Coverage Report
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const testOutput = `${{ steps.test.outputs.test_output }}`;
+            
+            const body = `## 🧪 Test Coverage Report
+            
+            \`\`\`
+            ${testOutput}
+            \`\`\`
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
