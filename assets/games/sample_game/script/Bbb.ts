@@ -1,3 +1,3 @@
 export class Bbb {
-    public string: string;
+    public string: string = '';
 }

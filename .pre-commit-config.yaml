@@ -1,0 +1,54 @@
+repos:
+  # Pre-commit hooks for general file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # ESLint hook for JavaScript/TypeScript linting
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.11.1
+    hooks:
+      - id: eslint
+        files: \.(js|ts|jsx|tsx)$
+        types: [file]
+        args: ['--fix']
+        exclude: |
+          (?x)^(
+            library/.*|
+            temp/.*|
+            build/.*|
+            tests/test_tool/.*
+          )$
+        additional_dependencies:
+          - '@eslint/js@^9.33.0'
+          - '@stylistic/eslint-plugin@^5.2.3'
+          - 'eslint@^9.33.0'
+          - 'eslint-plugin-no-commented-code@^1.0.10'
+          - 'eslint-plugin-unicorn@^55.0.0'
+          - 'typescript-eslint@^8.40.0'
+
+  # TypeScript type checking (optional but recommended)
+  - repo: local
+    hooks:
+      - id: tsc
+        name: TypeScript type check
+        entry: npx tsc --noEmit --skipLibCheck
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false
+        exclude: |
+          (?x)^(
+            assets/games/.*\.ts|
+            tests/test_tool/.*\.ts|
+            library/.*|
+            temp/.*|
+            build/.*
+          )$

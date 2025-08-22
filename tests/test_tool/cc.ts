@@ -25,7 +25,7 @@ export class Node {
 export const _decorator = {
     // Class decorator: no-op for tests
     ccclass: (_name?: string) => (ctor: any) => ctor,
-    
+
     // Property decorator: Handle both factory pattern and direct application
     property: (...args: any[]) => {
         // Check if this is called without parameters (@property)
@@ -36,7 +36,7 @@ export const _decorator = {
                 return undefined;
             };
         }
-        
+
         // If called with arguments, this is direct application (legacy behavior)
         // Just return undefined to not change the property
         return undefined;

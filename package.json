@@ -5,7 +5,10 @@
     "version": "3.8.5"
   },
   "scripts": {
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
+    "lint:fix": "eslint . --ext .js,.ts,.jsx,.tsx --fix",
+    "pre-commit": ".venv/Scripts/pre-commit.exe run --all-files"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.27.1",
