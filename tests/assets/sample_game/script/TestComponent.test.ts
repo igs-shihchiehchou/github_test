@@ -6,6 +6,7 @@ test('TestComponent should return the correct testProperty value', () => {
     const node = new Node();
     const component = node.addComponent(TestComponent);
     const text = 'Hello, World!';
+
     component.testProperty = text;
     expect(component.getTestProperty()).toBe(text);
 });
