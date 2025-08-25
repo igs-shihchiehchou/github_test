@@ -1,3 +1,161 @@
 {
-  "__version__": "1.3.9"
+  "__version__": "1.3.9",
+  "textureCompressConfig": {
+    "userPreset": {
+      "4dziYKxcVKiZMrHcxeQQV7": {
+        "name": "dq3-png-webp",
+        "options": {
+          "web": {
+            "png": {
+              "quality": 100
+            },
+            "webp": {
+              "quality": 70
+            },
+            "astc_6x6": {
+              "quality": "medium"
+            }
+          },
+          "ios": {
+            "png": {
+              "quality": 100
+            },
+            "webp": {
+              "quality": 80
+            },
+            "astc_4x4": {
+              "quality": "medium"
+            }
+          },
+          "android": {
+            "png": {
+              "quality": 100
+            },
+            "webp": {
+              "quality": 80
+            },
+            "astc_4x4": {
+              "quality": "medium"
+            }
+          }
+        }
+      },
+      "3bBkNvvTtOT7cEIl90nJdx": {
+        "name": "dq3-jpg-webp",
+        "options": {
+          "web": {
+            "jpg": {
+              "quality": 100
+            },
+            "webp": {
+              "quality": 70
+            },
+            "astc_6x6": {
+              "quality": "medium"
+            }
+          },
+          "ios": {
+            "jpg": {
+              "quality": 100
+            },
+            "webp": {
+              "quality": 80
+            },
+            "astc_4x4": {
+              "quality": "medium"
+            }
+          },
+          "android": {
+            "jpg": {
+              "quality": 100
+            },
+            "webp": {
+              "quality": 80
+            },
+            "astc_4x4": {
+              "quality": "medium"
+            }
+          }
+        }
+      },
+      "e77vxE2sFCaqY9tcIWRyi/": {
+        "name": "PartyGo General",
+        "options": {
+          "web": {},
+          "ios": {
+            "astc_6x6": {
+              "quality": "thorough"
+            }
+          },
+          "android": {
+            "astc_6x6": {
+              "quality": "thorough"
+            }
+          }
+        }
+      },
+      "30YIoHwqVMqaZiFpUemzHW": {
+        "name": "PartyGo Astc8x8",
+        "options": {
+          "ios": {
+            "astc_8x8": {
+              "quality": "thorough"
+            }
+          },
+          "android": {
+            "astc_8x8": {
+              "quality": "thorough"
+            }
+          }
+        }
+      },
+      "61WwGi7y9NyrpavAsJexy6": {
+        "name": "PartyGo Astc12x12",
+        "options": {
+          "ios": {
+            "astc_12x12": {
+              "quality": "thorough"
+            }
+          },
+          "android": {
+            "astc_12x12": {
+              "quality": "thorough"
+            }
+          }
+        }
+      },
+      "a61d73CIdKy7dHcnXxjE72": {
+        "name": "PartyGo Astc5x5",
+        "options": {
+          "ios": {
+            "astc_5x5": {
+              "quality": "exhaustive"
+            }
+          },
+          "android": {
+            "astc_5x5": {
+              "quality": "exhaustive"
+            }
+          }
+        }
+      },
+      "b8DT/5Wk9KS6J+RV2TTM6V": {
+        "name": "PartyGo Astc4x4",
+        "options": {
+          "ios": {
+            "astc_4x4": {
+              "quality": "exhaustive"
+            }
+          },
+          "android": {
+            "astc_4x4": {
+              "quality": "exhaustive"
+            }
+          }
+        }
+      }
+    },
+    "genMipmaps": false,
+    "customConfigs": {}
+  }
 }
