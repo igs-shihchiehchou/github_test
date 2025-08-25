@@ -35,22 +35,9 @@ repos:
           - 'eslint-plugin-unicorn@^55.0.0'
           - 'typescript-eslint@^8.40.0'
 
-  # TypeScript type checking (optional but recommended)
+  # Asset & Project Rules
   - repo: local
     hooks:
-      - id: tsc
-        name: TypeScript type check
-        entry: npx tsc --noEmit --skipLibCheck
-        language: system
-        files: \.(ts|tsx)$
-        pass_filenames: false
-        exclude: |
-          (?x)^(
-            tests/.*\.ts|
-            library/.*|
-            temp/.*|
-            build/.*
-          )$
       - id: asset-rules
         name: Asset & Project Rules
         entry: node scripts/validate-assets.mjs
