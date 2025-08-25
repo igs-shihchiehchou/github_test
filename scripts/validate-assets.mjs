@@ -65,17 +65,16 @@ async function checkImageSize(file) {
 
 // Determine allowed development directories under assets/games (excluding common & sample_game which are shared/demo)
 // If a file is added/modified under assets/ but not in games/<allowedGame>/, flag it.
-function checkGamePath(file) {
-  if (!file.startsWith('assets/')) {
+function checkAllowedPath(file) {
+  // Allowed paths:
+  // 1. assets/games/** (anything under games)
+  // 2. assets/scene/scene.scene (single file)
+  if (file.startsWith('assets/games/') || file === 'assets/scene/scene.scene') {
+    // early return: allowed path
     return;
   }
 
-  // Allowed shared folders: assets/games/ and assets/scene/scene.scene
-  if (file.startsWith('assets/games/') || file.startsWith('assets/scene/scene.scene')) {
-    return;
-  }
-
-  addViolation(file, '改動只能在 assets/games/ 底下。 (Forbidden to develop outside of game folder)', path);
+  addViolation(file, '只允許修改 assets/games/** 或 assets/scene/scene.scene (Changes outside allowed asset paths are forbidden)');
 }
 
 function checkMetaCompression(file) {
@@ -112,7 +111,7 @@ async function main() {
 
   for (const f of changedFiles) {
     checkSettings(f);
-    checkGamePath(f);
+    checkAllowedPath(f);
     checkMetaCompression(f);
     if (looksLikeTexture(f) && fs.existsSync(f)) {
       imageChecks.push(checkImageSize(f));
