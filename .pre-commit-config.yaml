@@ -46,8 +46,7 @@ repos:
         pass_filenames: false
         exclude: |
           (?x)^(
-            assets/games/.*\.ts|
-            tests/test_tool/.*\.ts|
+            tests/.*\.ts|
             library/.*|
             temp/.*|
             build/.*
