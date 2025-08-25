@@ -69,12 +69,12 @@ function checkAllowedPath(file) {
   // Allowed paths:
   // 1. assets/games/** (anything under games)
   // 2. assets/scene/scene.scene (single file)
-  if (file.startsWith('assets/games/') || file.startsWith('assets/tests/') || file === 'assets/scene/scene.scene') {
+  if (file.startsWith('assets/games/') || file.startsWith('tests/') || file === 'assets/scene/scene.scene') {
     // early return: allowed path
     return;
   }
 
-  addViolation(file, '只允許修改 assets/games/** 或 assets/scene/scene.scene (Changes outside allowed asset paths are forbidden)');
+  addViolation(file, '只允許修改 assets/games/** 或 tests/** 或 assets/scene/scene.scene (Changes outside allowed asset paths are forbidden)');
 }
 
 function checkMetaCompression(file) {
