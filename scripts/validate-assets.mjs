@@ -127,7 +127,7 @@ async function main() {
       console.error(`- ${v.file}: ${v.message}${v.detail ? ' -> ' + v.detail : ''}`);
     }
 
-    console.error('\n請修正以下問題!!! (Please fix the above issues before committing.)');
+    console.error('\n請修正以上問題!!! (Please fix the above issues before committing.)');
     process.exit(1);
   }
 }
