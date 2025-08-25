@@ -52,3 +52,13 @@ repos:
             temp/.*|
             build/.*
           )$
+      - id: asset-rules
+        name: Asset & Project Rules
+        entry: node scripts/validate-assets.mjs
+        language: system
+        pass_filenames: true
+        files: |
+          (?x)^(
+            assets/.*|
+            settings/.*
+          )$

@@ -323,7 +323,7 @@ export default [
 
   // Override: use 2-space indent for this config file itself
   {
-    files: ['eslint.config.mjs'],
+    files: ['**/*.mjs'],
     rules: {
       '@stylistic/indent': ['error', 2],
     },
