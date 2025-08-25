@@ -25,14 +25,17 @@ jobs:
         id: changes
         run: |
           echo "Comparing base ${{ github.event.pull_request.base.sha }} to head ${{ github.event.pull_request.head.sha }}"
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
-          echo "Changed files:\n$CHANGED_FILES"
-          if echo "$CHANGED_FILES" | grep -E '\\.(ts|js|tsx|jsx)$' >/dev/null 2>&1; then
-            echo "Code changes detected"
+          # Use triple-dot to compare merge base (safer for PRs)
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }})
+          echo "Changed files:"; printf '%s\n' "$CHANGED_FILES"
+
+          # Match typical JS/TS source & test file extensions
+          if printf '%s\n' "$CHANGED_FILES" | grep -E '\.(cjs|mjs|js|jsx|ts|tsx)$' >/dev/null 2>&1; then
             echo "code_changed=true" >> $GITHUB_OUTPUT
+            echo "Code changes detected => tests will run"
           else
-            echo "No code (*.ts|*.js|*.tsx|*.jsx) changes detected; test steps will be skipped"
             echo "code_changed=false" >> $GITHUB_OUTPUT
+            echo "No code (*.js|*.cjs|*.mjs|*.jsx|*.ts|*.tsx) changes detected => skipping tests"
           fi
 
       - name: Use Node.js
