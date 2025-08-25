@@ -69,7 +69,7 @@ function checkAllowedPath(file) {
   // Allowed paths:
   // 1. assets/games/** (anything under games)
   // 2. assets/scene/scene.scene (single file)
-  if (file.startsWith('assets/games/') || file === 'assets/scene/scene.scene') {
+  if (file.startsWith('assets/games/') || file.startsWith('assets/tests/') || file === 'assets/scene/scene.scene') {
     // early return: allowed path
     return;
   }
