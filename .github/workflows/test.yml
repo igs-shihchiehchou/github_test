@@ -18,24 +18,43 @@ jobs:
       # Setup the necessary tools
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 64
+          # Need full history so git diff between base and head works reliably
+          fetch-depth: 0
+
+      - name: Detect code changes
+        id: changes
+        run: |
+          echo "Comparing base ${{ github.event.pull_request.base.sha }} to head ${{ github.event.pull_request.head.sha }}"
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})
+          echo "Changed files:\n$CHANGED_FILES"
+          if echo "$CHANGED_FILES" | grep -E '\\.(ts|js|tsx|jsx)$' >/dev/null 2>&1; then
+            echo "Code changes detected"
+            echo "code_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No code (*.ts|*.js|*.tsx|*.jsx) changes detected; test steps will be skipped"
+            echo "code_changed=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Use Node.js
+        if: steps.changes.outputs.code_changed == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: 20.19.2
 
       - name: npm login
+        if: steps.changes.outputs.code_changed == 'true'
         run:
           npm config set //registry.npmjs.org/:_authToken=$NPM_READONLY_AUTH_TOKEN
         env:
           NPM_READONLY_AUTH_TOKEN: ${{ secrets.NPM_READONLY_AUTH_TOKEN }}
 
       - name: npm install dependencies
+        if: steps.changes.outputs.code_changed == 'true'
         run: npm install
 
       - name: Run Unit Test
         id: test
+        if: steps.changes.outputs.code_changed == 'true'
         run: |
           # Run tests and capture output
           TEST_OUTPUT=$(npm test 2>&1)
@@ -47,6 +66,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Check Coverage Threshold
+        if: steps.changes.outputs.code_changed == 'true'
         run: |
           # Extract line coverage percentage from Jest output
           COVERAGE=$(echo "${{ steps.test.outputs.test_output }}" | grep "All files" | awk '{print $10}' | sed 's/%//')
@@ -67,7 +87,7 @@ jobs:
           fi
 
       - name: Delete previous comment and add a new one
-        if: always()
+        if: steps.changes.outputs.code_changed == 'true'
         uses: actions/github-script@v4
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -106,4 +126,21 @@ jobs:
               owner,
               repo,
               body: body
+            });
+
+      - name: Skip comment (no code changes)
+        if: steps.changes.outputs.code_changed != 'true'
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const issue_number = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const body = `🧪 Jest tests skipped: no code (.ts/.js/.tsx/.jsx) changes detected in this PR.`;
+            github.issues.createComment({
+              issue_number,
+              owner,
+              repo,
+              body
             });
