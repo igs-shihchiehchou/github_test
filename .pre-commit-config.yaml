@@ -57,8 +57,3 @@ repos:
         entry: node scripts/validate-assets.mjs
         language: system
         pass_filenames: true
-        files: |
-          (?x)^(
-            assets/.*|
-            settings/.*
-          )$
