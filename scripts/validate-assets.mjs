@@ -17,6 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import sharp from 'sharp';
 
 // Changed files passed from pre-commit
 // pre-commit passes filenames
@@ -38,27 +39,12 @@ function looksLikeTexture(file) {
 }
 
 async function checkImageSize(file) {
-  let sharp = null;
-  try {
-    const sharpMod = await import('sharp').catch(() => null);
-    sharp = sharpMod && (sharpMod.default || sharpMod);
-    if (!sharp) {
-      addViolation(file, '無法 import sharp (Failed to import sharp)');
-      return;
-    }
-
-  } catch (_err) {
-    addViolation(file, '無法 import sharp (Failed to import sharp)');
-  }
-
-  // Dynamically import sharp if present; skip silently if missing or error.
   try {
     const meta = await sharp(file).metadata();
     if (meta.width && meta.height && (meta.width > maxTextureSize || meta.height > maxTextureSize)) {
       addViolation(file, '圖片大小(>2048x2048不合規定! (Texture too large >2048x2048)', `${meta.width}x${meta.height}`);
     }
   } catch (_err) {
-    // ignore errors (missing sharp or read failure)
     addViolation(file, '無法讀取圖片元數據 (Failed to read image metadata)');
   }
 }
