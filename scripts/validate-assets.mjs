@@ -63,19 +63,88 @@ function checkAllowedPath(file) {
   addViolation(file, '只允許修改 assets/games/** 或 tests/** 或 assets/scene/scene.scene (Changes outside allowed asset paths are forbidden)');
 }
 
-function checkMetaCompression(file) {
-  if (!file.endsWith('.json') && !file.endsWith('.meta')) {
+// --- Texture Compression Validation ---
+const builderPath = 'settings/v2/packages/builder.json';
+let builderLoaded = false;
+let allowedAstcPresetIds = new Set();
+
+function loadBuilderCompressionPresets() {
+  if (builderLoaded) {
+  // already attempted
     return;
   }
 
-  // Heuristic: load and search for astc property
+  builderLoaded = true;
+  try {
+    const raw = fs.readFileSync(builderPath, 'utf8');
+    const json = JSON.parse(raw);
+    const presets = (json && json.textureCompressConfig && json.textureCompressConfig.userPreset) || {};
+    const entries = Object.entries(presets);
+    const namePattern = /^PartyGo Astc(\d+)x(\d+)$/i;
+    for (const [id, preset] of entries) {
+      if (preset && namePattern.test(preset.name)) {
+        allowedAstcPresetIds.add(id);
+      }
+    }
+  } catch (_e) {
+    // If we can't read it, leave set empty; later checks will flag.
+  }
+}
+
+function isMetaPath(file) {
+  return file.endsWith('.meta');
+}
+
+function isImageImporterMeta(file) {
+  if (!isMetaPath(file)) {
+    return false;
+  }
+
+  try {
+    if (!fs.existsSync(file)) {
+      return false;
+    }
+
+    const content = fs.readFileSync(file, 'utf8');
+    const json = JSON.parse(content);
+    return json && json.importer === 'image';
+  } catch (_e) {
+    // silently ignore parse errors here; they'll be handled later if needed
+    return false;
+  }
+}
+
+function checkTextureMetaCompression(file) {
+  if (!isMetaPath(file)) {
+    return;
+  }
+
   try {
     const content = fs.readFileSync(file, 'utf8');
-    if (/texture/i.test(content) && !/astc/i.test(content)) {
-      addViolation(file, '圖片壓縮格式錯誤，只接受 Astc! (Texture compression not set to ASTC, expected PartyGo Astc)');
+    const json = JSON.parse(content);
+    // only enforce for image importer meta
+    if (json.importer !== 'image') {
+      return;
     }
-  } catch (_err) {
-    // ignore read error
+
+    const compress = json.userData && json.userData.compressSettings;
+    if (!compress) {
+      addViolation(file, '缺少 compressSettings (Missing compressSettings in image .meta)');
+      return;
+    }
+
+    if (!compress.useCompressTexture) {
+      addViolation(file, '未啟用貼圖壓縮 useCompressTexture (useCompressTexture not true)');
+    }
+
+    const presetId = compress.presetId;
+    if (!presetId) {
+      addViolation(file, '缺少壓縮 presetId (Missing presetId in compressSettings)');
+    } else if (!allowedAstcPresetIds.has(presetId)) {
+      addViolation(file, '使用未授權的壓縮預設 (Preset not an allowed PartyGo Astc)', presetId);
+    }
+  } catch (_e) {
+    addViolation(file, '無法解析貼圖 meta 以檢查壓縮設定 (Failed to parse image meta for compression check)');
   }
 }
 
@@ -94,11 +163,21 @@ function checkSettings(file) {
 
 async function main() {
   const imageChecks = [];
+  // Determine if we need to validate builder compression config
+  const needBuilderValidation = changedFiles.includes(builderPath) || changedFiles.some(isImageImporterMeta);
+  if (needBuilderValidation) {
+    loadBuilderCompressionPresets();
+
+    if (!allowedAstcPresetIds.size) {
+      addViolation(builderPath, '無法驗證貼圖壓縮，因為沒有可用的 PartyGo Astc 預設 (No PartyGo Astc presets loaded from builder.json)');
+      return;
+    }
+  }
 
   for (const f of changedFiles) {
     checkSettings(f);
     checkAllowedPath(f);
-    checkMetaCompression(f);
+    checkTextureMetaCompression(f);
     if (looksLikeTexture(f) && fs.existsSync(f)) {
       imageChecks.push(checkImageSize(f));
     }
