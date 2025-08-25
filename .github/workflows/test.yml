@@ -90,7 +90,7 @@ jobs:
           fi
 
       - name: Delete previous comment and add a new one
-        if: steps.changes.outputs.code_changed == 'true'
+        if: always() && steps.changes.outputs.code_changed == 'true'
         uses: actions/github-script@v4
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -116,7 +116,6 @@ jobs:
               }
             }
 
-
             const body = `## 🧪 Test Coverage Report
 
             \`\`\`
@@ -132,7 +131,7 @@ jobs:
             });
 
       - name: Skip comment (no code changes)
-        if: steps.changes.outputs.code_changed != 'true'
+        if: always() && steps.changes.outputs.code_changed != 'true'
         uses: actions/github-script@v4
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
