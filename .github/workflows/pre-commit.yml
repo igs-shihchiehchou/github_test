@@ -1,15 +1,6 @@
 name: Pre-commit
 
-on:
-  pull_request:
-    paths:
-      - 'assets/games/**'
-      - 'tests/**'
-      - '*.ts'
-      - '*.js'
-      - '*.json'
-      - '*.yml'
-      - '*.yaml'
+on: pull_request
 
 jobs:
   pre-commit-changed:
