@@ -186,7 +186,6 @@ async function main() {
   await Promise.all(imageChecks);
 
   if (violations.length) {
-    /* global console */
     console.error('\n專案規則檢查 (Asset / Project rule violations):');
     for (const v of violations) {
       console.error(`- ${v.file}: ${v.message}${v.detail ? ' -> ' + v.detail : ''}`);

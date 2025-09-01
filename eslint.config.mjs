@@ -23,6 +23,12 @@ export default [
       'extensions*',
       'tests/test_tool/**',
       '*.config.*',
+      'local/**',
+      'native/**',
+      'assets/common/3rdparty/**',
+      'assets/external/**',
+      'assets/platform/**',
+      'assets/proto/**',
     ],
   },
 
@@ -38,6 +44,13 @@ export default [
       unicorn,
       nocommentedcode,
     },
+
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+      },
+    },
+
     rules: {
       '@stylistic/indent': ['error', 4],
       '@stylistic/no-trailing-spaces': 'error',
@@ -97,6 +110,11 @@ export default [
       'no-eval': 'error',
       'no-implied-eval': 'error',
 
+      // DOM manipulation safety
+      'no-undef': 'error', // Catches undefined DOM globals
+      'no-global-assign': 'error', // Prevents overwriting global DOM objects
+      'no-implicit-globals': 'error', // Prevents accidental global pollution
+
       // Naming conventions
       '@typescript-eslint/naming-convention': [
         'error',
@@ -117,10 +135,10 @@ export default [
           selector: 'typeLike',
           format: ['PascalCase'],
         },
-        // Enum members typically UPPER_CASE
+        // Enum members in PascalCase for better readability
         {
           selector: 'enumMember',
-          format: ['UPPER_CASE'],
+          format: ['PascalCase'],
         },
       ],
 
