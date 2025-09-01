@@ -85,7 +85,7 @@ export default [
       '@stylistic/eol-last': ['error', 'always'],
       '@stylistic/switch-colon-spacing': ['error', { after: true, before: false }],
       "spaced-comment": ["error", "always"],
-      '@stylistic/lines-around-comment': ["error", { "afterBlockComment": true, "allowBlockStart": true, "allowClassStart": true, "ignorePattern": "pragma" }],
+      '@stylistic/lines-around-comment': ["error", { "afterBlockComment": false, "allowBlockStart": true, "allowClassStart": true, "ignorePattern": "pragma" }],
       '@stylistic/linebreak-style': ["error", "unix"],
       '@stylistic/line-comment-position': ["error", { "position": "above", "ignorePattern": "pragma" }],
 

@@ -17,7 +17,21 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { execSync } from 'node:child_process';
 import sharp from 'sharp';
+
+// File path constants
+const assetsGamesPath = 'assets/games/';
+const assetsScenePath = 'assets/scene/fake_main.scene';
+const testsPath = 'tests/';
+const settingsPath = 'settings/';
+const builderConfigPath = 'settings/v2/packages/builder.json';
+
+// Rule helpers
+const maxTextureSize = 2048;
+const imageExt = new Set(['.png', '.jpg', '.jpeg', '.webp']);
+let builderLoaded = false;
+let allowedAstcPresetIds = new Set();
 
 // Changed files passed from pre-commit
 // pre-commit passes filenames
@@ -28,10 +42,6 @@ let violations = [];
 function addViolation(file, message, detail) {
   violations.push({ file, message, detail });
 }
-
-// Rule helpers
-const maxTextureSize = 2048;
-const imageExt = new Set(['.png', '.jpg', '.jpeg', '.webp']);
 
 function looksLikeTexture(file) {
   const ext = path.extname(file).toLowerCase();
@@ -49,24 +59,81 @@ async function checkImageSize(file) {
   }
 }
 
-// Determine allowed development directories under assets/games (excluding common & sample_game which are shared/demo)
-// If a file is added/modified under assets/ but not in games/<allowedGame>/, flag it.
+function checkFakeMainScene(file) {
+  let foundDisallowedChange = false;
+
+  if (file !== assetsScenePath) {
+    // Special case for fake_main.scene
+    return foundDisallowedChange;
+  }
+
+  try {
+    // Get the git diff for this file to see what changed between main and current HEAD
+    // This will show all changes in the PR, not just the last commit
+    let gitDiff = execSync(`git diff origin/main HEAD "${file}"`, { encoding: 'utf8' });
+
+    if (gitDiff === '') {
+      // get current staged changes
+      gitDiff = execSync(`git diff --cached "${file}"`, { encoding: 'utf8' });
+    }
+
+    if (!gitDiff.trim()) {
+      // No changes detected
+      return foundDisallowedChange;
+    }
+
+    foundDisallowedChange = true;
+
+    // Parse the diff to extract only the changed lines
+    const diffLines = gitDiff.split('\n');
+    const addedLines = diffLines.filter(line => line.startsWith('+') && !line.startsWith('+++'));
+    const removedLines = diffLines.filter(line => line.startsWith('-') && !line.startsWith('---'));
+
+    // Check if changes are only to allowed fields
+    for (const line of [...addedLines, ...removedLines]) {
+      // Remove +/- prefix
+      const cleanLine = line.substring(1).trim();
+
+      // Check if this line contains a field assignment (key: value pattern)
+      const fieldAssignmentPattern = /^\s*"([^"]+)"\s*:/;
+      const fieldMatch = cleanLine.match(fieldAssignmentPattern);
+
+      if (fieldMatch) {
+        // This line contains a field assignment, check if it's an allowed field
+        const fieldName = fieldMatch[1];
+        const allowedFields = ['gameBundleName', 'gameSceneName'];
+
+        if (!allowedFields.includes(fieldName)) {
+          addViolation(
+            file,
+            'fake_main.scene 只允許修改 gameBundleName 和 gameSceneName 欄位 (Only gameBundleName and gameSceneName changes are allowed in fake_main.scene)',
+            `Field: ${fieldName} in line: ${cleanLine}`,
+          );
+          break;
+        }
+      }
+    }
+  } catch (error) {
+    foundDisallowedChange = true;
+    // If git command fails, we might be in a non-git environment or other issue
+    addViolation(file, '無法檢查 fake_main.scene 的變更 (Failed to check fake_main.scene changes)', error.message);
+  }
+
+  return foundDisallowedChange;
+}
+
 function checkAllowedPath(file) {
-  // Allowed paths:
-  // 1. assets/games/** (anything under games)
-  // 2. assets/scene/scene.scene (single file)
-  if (file.startsWith('assets/games/') || file.startsWith('tests/') || file === 'assets/scene/scene.scene') {
+  if (checkFakeMainScene(file)) {
+    return;
+  }
+
+  if (file.startsWith(assetsGamesPath) || file.startsWith(testsPath)) {
     // early return: allowed path
     return;
   }
 
-  addViolation(file, '只允許修改 assets/games/** 或 tests/** 或 assets/scene/scene.scene (Changes outside allowed asset paths are forbidden)');
+  addViolation(file, `只允許修改 ${assetsGamesPath} 或 ${testsPath} 或 ${assetsScenePath} (Changes outside allowed asset paths are forbidden)`);
 }
-
-// --- Texture Compression Validation ---
-const builderPath = 'settings/v2/packages/builder.json';
-let builderLoaded = false;
-let allowedAstcPresetIds = new Set();
 
 function loadBuilderCompressionPresets() {
   if (builderLoaded) {
@@ -76,7 +143,7 @@ function loadBuilderCompressionPresets() {
 
   builderLoaded = true;
   try {
-    const raw = fs.readFileSync(builderPath, 'utf8');
+    const raw = fs.readFileSync(builderConfigPath, 'utf8');
     const json = JSON.parse(raw);
     const presets = (json && json.textureCompressConfig && json.textureCompressConfig.userPreset) || {};
     const entries = Object.entries(presets);
@@ -149,7 +216,7 @@ function checkTextureMetaCompression(file) {
 }
 
 function checkSettings(file) {
-  if (file.startsWith('settings/')) {
+  if (file.startsWith(settingsPath)) {
     // Disallow direct modifications except allowlist
     const allowlist = [
       // placeholder for files allowed to change automatically
@@ -164,12 +231,12 @@ function checkSettings(file) {
 async function main() {
   const imageChecks = [];
   // Determine if we need to validate builder compression config
-  const needBuilderValidation = changedFiles.includes(builderPath) || changedFiles.some(isImageImporterMeta);
+  const needBuilderValidation = changedFiles.includes(builderConfigPath) || changedFiles.some(isImageImporterMeta);
   if (needBuilderValidation) {
     loadBuilderCompressionPresets();
 
     if (!allowedAstcPresetIds.size) {
-      addViolation(builderPath, '無法驗證貼圖壓縮，因為沒有可用的 PartyGo Astc 預設 (No PartyGo Astc presets loaded from builder.json)');
+      addViolation(builderConfigPath, '無法驗證貼圖壓縮，因為沒有可用的 PartyGo Astc 預設 (No PartyGo Astc presets loaded from builder.json)');
       return;
     }
   }
