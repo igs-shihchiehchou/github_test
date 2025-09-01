@@ -99,3 +99,4 @@ npm run test
 - **mixed-line-ending**: Fixes mixed line endings
 - **eslint**: Runs ESLint with auto-fix for TypeScript/JavaScript files
 - **tsc**: TypeScript type checking
+### New Change
